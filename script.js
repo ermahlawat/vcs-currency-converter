@@ -1,7 +1,11 @@
 const state = {
+    // These are FALLBACKS. The app will fetch fresh rates immediately.
     rates: { "INR": 83.45, "USD": 1.0 },
     lastUpdate: "",
-    currencies: { "USD": "United States Dollar", "INR": "Indian Rupee", "EUR": "Euro", "GBP": "British Pound", "JPY": "Japanese Yen", "CAD": "Canadian Dollar", "AUD": "Australian Dollar" }
+    currencies: { 
+        "USD": "US Dollar", "INR": "Indian Rupee", "EUR": "Euro", 
+        "GBP": "British Pound", "JPY": "Japanese Yen", "CAD": "Canadian Dollar" 
+    }
 };
 
 const amountInput = document.getElementById('amount');
@@ -10,16 +14,15 @@ const toSelect = document.getElementById('to-currency');
 const mainResult = document.getElementById('main-result-display');
 const numOutput = document.getElementById('numeric-output');
 const wordOutput = document.getElementById('word-value');
-const rateSummary = document.getElementById('top-rate-summary');
 const themeCheckbox = document.getElementById('theme-checkbox');
 
 window.addEventListener('DOMContentLoaded', () => {
     initTheme();
     populateCurrencies();
-    fetchRates();
+    fetchRates(); // Initial fetch
     
     amountInput.addEventListener('input', convert);
-    fromSelect.addEventListener('change', fetchRates);
+    fromSelect.addEventListener('change', fetchRates); // Re-fetch when base changes
     toSelect.addEventListener('change', convert);
     document.getElementById('swap-btn').addEventListener('click', swapCurrencies);
     document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
@@ -29,14 +32,18 @@ window.addEventListener('DOMContentLoaded', () => {
 async function fetchRates() {
     const base = fromSelect.value;
     try {
-        const response = await fetch(`https://api.frankfurter.app/latest?from=${base}`);
+        // Cache busting: Added a timestamp to ensure fresh live rates
+        const response = await fetch(`https://api.frankfurter.app/latest?from=${base}&_=${Date.now()}`);
         const data = await response.json();
         state.rates = data.rates;
         state.rates[base] = 1.0;
-        state.lastUpdate = new Date().toLocaleString('en-GB', { day: 'j', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        document.getElementById('timestamp').innerText = `${state.lastUpdate} UTC · Disclaimer`;
+        state.lastUpdate = new Date().toLocaleString();
+        document.getElementById('timestamp').innerText = `${state.lastUpdate} · Live Market Data`;
         convert();
-    } catch (e) { convert(); }
+    } catch (e) {
+        console.error("API Fetch failed, using last known rates.");
+        convert(); 
+    }
 }
 
 function convert() {
@@ -46,20 +53,18 @@ function convert() {
     const rate = state.rates[to] || 1;
     const result = amount * rate;
 
-    // Google-style Large Display
-    rateSummary.innerText = `${amount} ${state.currencies[from]} equals`;
-    mainResult.innerText = `${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 3 }).format(result)} ${state.currencies[to]}`;
-    
-    // Grid Display
+    // UI Updates
+    document.getElementById('top-rate-summary').innerText = `${amount} ${state.currencies[from]} equals`;
+    mainResult.innerText = `${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(result)} ${state.currencies[to]}`;
     numOutput.innerText = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(result);
     
-    // Capitalized Word Output
+    // Capitalization Fix
     const words = numberToWordsIndian(result, to);
     wordOutput.innerText = words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 function populateCurrencies() {
-    const options = Object.entries(state.currencies).map(([code, name]) => `<option value="${code}">${name}</option>`).join('');
+    const options = Object.entries(state.currencies).map(([code, name]) => `<option value="${code}">${code}</option>`).join('');
     fromSelect.innerHTML = options;
     toSelect.innerHTML = options;
     fromSelect.value = 'USD';
@@ -71,7 +76,7 @@ function numberToWordsIndian(n, code) {
     const main = parseInt(amount[0]);
     const sub = parseInt(amount[1]);
     let str = (main === 0) ? "zero" : convertToIndianWords(main);
-    let cur = (code === 'USD') ? "dollars" : (code === 'INR') ? "rupees" : "units";
+    let cur = (code === 'INR') ? "rupees" : (code === 'USD') ? "dollars" : "units";
     str += ` ${cur}`;
     if (sub > 0) str += ` and ${convertToIndianWords(sub)} cents`;
     return str + " only";

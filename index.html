@@ -11,29 +11,28 @@
     <div class="app-wrapper">
         <header class="top-bar">
             <div class="brand"><b>VCs</b> Converter</div>
-            <div class="theme-toggle">
+            <div class="theme-switch-container">
+                <span class="mode-label">Dark Mode</span>
                 <input type="checkbox" id="theme-checkbox">
                 <label for="theme-checkbox" class="slider-label">
-                    <span class="mode-text light">Light</span>
-                    <span class="mode-text dark">Dark</span>
                     <div class="switch-ball"></div>
                 </label>
             </div>
         </header>
 
         <main class="converter-container">
-            <p id="top-rate-summary" class="summary-text">1 USD equals</p>
-            <h2 id="main-result-display" class="large-result">Loading...</h2>
-            <p id="timestamp" class="date-text">7 Apr, 2026 · Disclaimer</p>
+            <p id="top-rate-summary" class="summary-text">1 US Dollar equals</p>
+            <h2 id="main-result-display" class="large-result">...</h2>
+            <p id="timestamp" class="date-text">Syncing live rates...</p>
 
             <div class="input-grid">
                 <div class="conversion-box">
-                    <input type="number" id="amount" value="1" inputmode="decimal">
+                    <input type="number" id="amount" value="1000" inputmode="decimal">
                     <div class="divider"></div>
                     <select id="from-currency"></select>
                 </div>
 
-                <button id="swap-btn" class="swap-action-btn" title="Swap">⇅</button>
+                <button id="swap-btn" class="swap-action-btn">⇅</button>
 
                 <div class="conversion-box">
                     <div id="numeric-output" class="read-only-display">0.00</div>
@@ -45,7 +44,7 @@
             <div class="word-output-section">
                 <div class="word-card">
                     <span id="word-value">Calculating...</span>
-                    <button id="copy-btn" class="copy-link">Copy Text</button>
+                    <button id="copy-btn" class="copy-link">Copy</button>
                 </div>
             </div>
         </main>
