@@ -9,7 +9,7 @@ const state = {
 const amountInput = document.getElementById('amount');
 const fromSelect = document.getElementById('from-currency');
 const toSelect = document.getElementById('to-currency');
-const mainDisplay = document.getElementById('main-result');
+const mainDisplay = document.getElementById('main-result-display');
 const numOutput = document.getElementById('numeric-output');
 const wordOutput = document.getElementById('word-value');
 const themeCheckbox = document.getElementById('theme-checkbox');
@@ -29,22 +29,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
 async function fetchRates() {
     const from = fromSelect.value.toUpperCase();
-    mainDisplay.innerText = "Connecting...";
-    
     try {
-        // NEW API: Using ExchangeRate-API (No Key version)
         const response = await fetch(`https://open.er-api.com/v6/latest/${from}`);
-        if (!response.ok) throw new Error("API issue");
-        
         const data = await response.json();
         state.rates = data.rates;
-        state.lastUpdate = new Date().toLocaleTimeString();
-        
-        document.getElementById('timestamp').innerText = `${state.lastUpdate} · Live Market`;
+        document.getElementById('timestamp').innerText = `${new Date().toLocaleTimeString()} · Live Market`;
         convert();
     } catch (e) {
-        console.error("New API failed:", e);
-        document.getElementById('timestamp').innerText = "Using Cache (Network Error)";
         convert();
     }
 }
@@ -53,15 +44,13 @@ function convert() {
     const amount = parseFloat(amountInput.value) || 0;
     const from = fromSelect.value;
     const to = toSelect.value;
-    
     const rate = state.rates[to] || 1;
     const result = amount * rate;
 
-    document.getElementById('top-summary').innerText = `${amount} ${state.currencies[from]} equals`;
+    document.getElementById('top-rate-summary').innerText = `${amount.toLocaleString('en-IN')} ${state.currencies[from]} equals`;
     mainDisplay.innerText = `${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(result)} ${state.currencies[to]}`;
     numOutput.innerText = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(result);
     
-    // CAPITALIZATION FIX (One thousand...)
     const words = numberToWordsIndian(result, to);
     wordOutput.innerText = words.charAt(0).toUpperCase() + words.slice(1);
 }
@@ -78,10 +67,18 @@ function numberToWordsIndian(n, code) {
     const amount = n.toFixed(2).split(".");
     const main = parseInt(amount[0]);
     const sub = parseInt(amount[1]);
+    
     let str = (main === 0) ? "zero" : convertToIndianWords(main);
-    let cur = (code === 'INR') ? "rupees" : (code === 'USD') ? "dollars" : "units";
+    
+    // FIX: Currency specific sub-units
+    let cur = "units", subCur = "cents";
+    if (code === 'INR') { cur = "rupees"; subCur = "paise"; }
+    else if (code === 'USD') { cur = "dollars"; subCur = "cents"; }
+    else if (code === 'GBP') { cur = "pounds"; subCur = "pence"; }
+    else if (code === 'EUR') { cur = "euros"; subCur = "cents"; }
+
     str += ` ${cur}`;
-    if (sub > 0) str += ` and ${convertToIndianWords(sub)} cents`;
+    if (sub > 0) str += ` and ${convertToIndianWords(sub)} ${subCur}`;
     return str + " only";
 }
 
