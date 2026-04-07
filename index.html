@@ -5,43 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VCs Currency Converter</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <header>
             <h1 class="main-title"><b>VCs</b> Currency Converter</h1>
-            <p class="subtitle">Use the currency calculator below to get an instant conversion and word-based output.</p>
+            <p class="subtitle">Enter an amount and select currencies for an instant, word-based conversion.</p>
         </header>
 
         <div class="calculator-box">
-            <div class="input-row">
-                <label>Amount to convert</label>
-                <input type="number" id="amount" placeholder="Enter Amount" value="1000">
+            <div class="field-row">
+                <label for="amount">Amount to convert</label>
+                <input type="number" id="amount" value="1000" inputmode="decimal">
             </div>
 
-            <div class="input-row">
+            <div class="field-row">
                 <label>Currencies to exchange</label>
-                <div class="selectors">
+                <div class="selector-group">
                     <select id="from-currency"></select>
-                    <button id="swap-btn" class="swap-btn">⇄</button>
+                    <button id="swap-btn" class="icon-btn" title="Swap">⇄</button>
                     <select id="to-currency"></select>
                 </div>
             </div>
 
-            <div class="theme-row">
-                <span>Date <b>04/07/2026</b></span>
-                <span class="divider">|</span>
-                <button id="theme-toggle" class="text-btn">Toggle Dark Mode</button>
+            <div class="meta-row">
+                <span id="current-date">Date: 04/07/2026</span>
+                <div class="toggle-container">
+                    <span class="toggle-label">Dark Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="theme-checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
             </div>
 
-            <div class="result-section">
-                <h2 id="res-value">0.00</h2>
-                <div class="word-box">
-                    <span id="word-value">Calculating...</span>
-                    <button id="copy-words" class="copy-icon" title="Copy">📋</button>
+            <div class="output-section">
+                <div class="display-value" id="res-value">0.00</div>
+                <div class="word-card">
+                    <p id="word-value">Initializing...</p>
+                    <button id="copy-words" class="copy-btn">Copy</button>
                 </div>
-                <p id="rate-text" class="rate-info">Fetching live market rates...</p>
+                <div class="market-info">
+                    <p id="rate-text">Loading live market data...</p>
+                    <p id="last-updated"></p>
+                </div>
             </div>
         </div>
     </div>

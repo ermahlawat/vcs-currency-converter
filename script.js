@@ -1,12 +1,8 @@
 const state = {
-    // High-accuracy fallback rates
-    rates: { "INR": 83.42, "EUR": 0.92, "GBP": 0.79, "JPY": 151.8, "USD": 1.0 },
-    base: 'USD',
+    rates: { "INR": 83.45, "EUR": 0.92, "GBP": 0.79, "JPY": 151.6, "USD": 1.0 },
     lastUpdate: null,
     currencies: {
-        "USD": "US Dollar", "EUR": "Euro", "GBP": "British Pound",
-        "INR": "Indian Rupee", "AUD": "Australian Dollar", "CAD": "Canadian Dollar",
-        "SGD": "Singapore Dollar", "JPY": "Japanese Yen", "CNY": "Chinese Yuan"
+        "USD": "USD", "EUR": "EUR", "GBP": "GBP", "INR": "INR", "AUD": "AUD", "CAD": "CAD", "JPY": "JPY", "CNY": "CNY"
     }
 };
 
@@ -17,7 +13,6 @@ const resValue = document.getElementById('res-value');
 const wordValue = document.getElementById('word-value');
 const rateText = document.getElementById('rate-text');
 const lastUpdateText = document.getElementById('last-updated');
-const offlineBadge = document.getElementById('offline-badge');
 const themeCheckbox = document.getElementById('theme-checkbox');
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -38,17 +33,15 @@ async function fetchRates() {
     try {
         const response = await fetch(`https://api.frankfurter.app/latest?from=${base}`);
         if (!response.ok) throw new Error();
-        
         const data = await response.json();
+        
         state.rates = data.rates;
-        state.rates[base] = 1.0; 
+        state.rates[base] = 1.0; // Force base to be 1.0
         state.lastUpdate = new Date().toLocaleTimeString();
         
-        offlineBadge.classList.add('hidden');
         localStorage.setItem(`rates_${base}`, JSON.stringify(state.rates));
         convert();
     } catch (err) {
-        offlineBadge.classList.remove('hidden');
         const cached = localStorage.getItem(`rates_${base}`);
         if (cached) state.rates = JSON.parse(cached);
         convert();
@@ -66,10 +59,9 @@ function convert() {
         return;
     }
 
+    // Fixed logic: result = input * (rate of 'to' currency relative to 'from')
     const rate = state.rates[to];
-    if (!rate) return;
-
-    let result = amount * rate;
+    const result = amount * rate;
 
     resValue.innerText = new Intl.NumberFormat('en-IN', {
         maximumFractionDigits: 2,
@@ -78,12 +70,12 @@ function convert() {
     
     wordValue.innerText = numberToWordsIndian(result, to);
     rateText.innerText = `1 ${from} = ${rate.toFixed(4)} ${to}`;
-    lastUpdateText.innerText = `Update: ${state.lastUpdate || 'Cached'}`;
+    lastUpdateText.innerText = `Refreshed at: ${state.lastUpdate || 'Cache'}`;
 }
 
 function populateCurrencies() {
     const options = Object.entries(state.currencies)
-        .map(([code, name]) => `<option value="${code}">${code} - ${name}</option>`)
+        .map(([code]) => `<option value="${code}">${code}</option>`)
         .join('');
     fromSelect.innerHTML = options;
     toSelect.innerHTML = options;
