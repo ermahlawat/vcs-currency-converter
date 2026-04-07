@@ -1,15 +1,13 @@
 const state = {
-    // FIXED: Starter rates ensure the app NEVER shows NaN on first load
-    rates: { "INR": 83.50, "EUR": 0.92, "GBP": 0.79, "JPY": 151.0, "USD": 1.0 },
+    // High-accuracy fallback rates
+    rates: { "INR": 83.42, "EUR": 0.92, "GBP": 0.79, "JPY": 151.8, "USD": 1.0 },
     base: 'USD',
     lastUpdate: null,
     currencies: {
         "USD": "US Dollar", "EUR": "Euro", "GBP": "British Pound",
         "INR": "Indian Rupee", "AUD": "Australian Dollar", "CAD": "Canadian Dollar",
-        "SGD": "Singapore Dollar", "JPY": "Japanese Yen", "CNY": "Chinese Yuan",
-        "BRL": "Brazilian Real", "MXN": "Mexican Peso", "ZAR": "South African Rand"
-    },
-    favs: ['USD/INR', 'EUR/USD', 'GBP/INR', 'USD/JPY']
+        "SGD": "Singapore Dollar", "JPY": "Japanese Yen", "CNY": "Chinese Yuan"
+    }
 };
 
 const amountInput = document.getElementById('amount');
@@ -20,29 +18,30 @@ const wordValue = document.getElementById('word-value');
 const rateText = document.getElementById('rate-text');
 const lastUpdateText = document.getElementById('last-updated');
 const offlineBadge = document.getElementById('offline-badge');
+const themeCheckbox = document.getElementById('theme-checkbox');
 
 window.addEventListener('DOMContentLoaded', () => {
     initTheme();
     populateCurrencies();
     fetchRates();
-    renderFavs();
     
     amountInput.addEventListener('input', convert);
     fromSelect.addEventListener('change', fetchRates);
     toSelect.addEventListener('change', convert);
     document.getElementById('swap-btn').addEventListener('click', swapCurrencies);
     document.getElementById('copy-words').addEventListener('click', copyToClipboard);
-    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    themeCheckbox.addEventListener('change', toggleTheme);
 });
 
 async function fetchRates() {
     const base = fromSelect.value;
     try {
-        const response = await fetch(`https://api.frankfurter.app/latest?from=${base}&nocache=${Date.now()}`);
+        const response = await fetch(`https://api.frankfurter.app/latest?from=${base}`);
         if (!response.ok) throw new Error();
         
         const data = await response.json();
         state.rates = data.rates;
+        state.rates[base] = 1.0; 
         state.lastUpdate = new Date().toLocaleTimeString();
         
         offlineBadge.classList.add('hidden');
@@ -51,34 +50,35 @@ async function fetchRates() {
     } catch (err) {
         offlineBadge.classList.remove('hidden');
         const cached = localStorage.getItem(`rates_${base}`);
-        if (cached) {
-            state.rates = JSON.parse(cached);
-        }
+        if (cached) state.rates = JSON.parse(cached);
         convert();
     }
 }
 
 function convert() {
     const amount = parseFloat(amountInput.value);
-    const to = toSelect.value;
     const from = fromSelect.value;
+    const to = toSelect.value;
 
-    // Safety: prevent NaN if data isn't loaded yet
     if (isNaN(amount) || amount <= 0) {
         resValue.innerText = '0.00';
         wordValue.innerText = 'Zero units only';
         return;
     }
 
-    let result = (from === to) ? amount : amount * (state.rates[to] || 1);
+    const rate = state.rates[to];
+    if (!rate) return;
 
-    resValue.innerText = (from === 'INR' || to === 'INR') ? 
-        new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(result) :
-        new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(result);
+    let result = amount * rate;
+
+    resValue.innerText = new Intl.NumberFormat('en-IN', {
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2
+    }).format(result);
     
     wordValue.innerText = numberToWordsIndian(result, to);
-    if (state.rates[to]) rateText.innerText = `1 ${from} = ${state.rates[to].toFixed(4)} ${to}`;
-    lastUpdateText.innerText = `Last updated: ${state.lastUpdate || 'Initial Load'}`;
+    rateText.innerText = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+    lastUpdateText.innerText = `Update: ${state.lastUpdate || 'Cached'}`;
 }
 
 function populateCurrencies() {
@@ -135,22 +135,11 @@ function copyToClipboard() {
 function initTheme() {
     const s = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', s);
+    themeCheckbox.checked = s === 'dark';
 }
 
 function toggleTheme() {
-    const c = document.documentElement.getAttribute('data-theme');
-    const t = c === 'light' ? 'dark' : 'light';
+    const t = themeCheckbox.checked ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', t);
     localStorage.setItem('theme', t);
 }
-
-function renderFavs() {
-    document.getElementById('favorites-list').innerHTML = state.favs.map(p => `<div class="chip" onclick="applyPair('${p}')">${p}</div>`).join('');
-}
-
-window.applyPair = (p) => {
-    const [f, t] = p.split('/');
-    fromSelect.value = f;
-    toSelect.value = t;
-    fetchRates();
-};

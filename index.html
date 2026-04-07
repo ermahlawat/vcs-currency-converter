@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VCs Currency Converter | Premium Live Exchange</title>
+    <title>VCs Currency Converter</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
@@ -17,16 +17,21 @@
                 </h1>
                 <div id="offline-badge" class="badge hidden">Offline Mode</div>
             </div>
-            <button id="theme-toggle" aria-label="Toggle Dark Mode">
-                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M18.36 5.64l1.42-1.42"/></svg>
-                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            </button>
+            
+            <div class="theme-switch-wrapper">
+                <input type="checkbox" id="theme-checkbox" class="theme-checkbox">
+                <label for="theme-checkbox" class="theme-label">
+                    <svg class="sun-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                    <svg class="moon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <div class="ball"></div>
+                </label>
+            </div>
         </header>
 
         <main class="converter-card">
             <div class="input-group">
                 <label for="amount">Amount</label>
-                <input type="number" id="amount" placeholder="0.00" step="any" inputmode="decimal" value="100">
+                <input type="number" id="amount" placeholder="0.00" step="any" inputmode="decimal" value="1000">
             </div>
 
             <div class="currency-selectors">
@@ -35,12 +40,14 @@
                     <select id="from-currency"></select>
                 </div>
                 
-                <button id="swap-btn" class="swap-btn" aria-label="Swap Currencies">
-                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M7 10l5-5 5 5M17 14l-5 5-5-5"/>
-                        <path d="M12 5v14"/>
-                    </svg>
-                </button>
+                <div class="swap-wrapper">
+                    <button id="swap-btn" class="swap-btn" aria-label="Swap">
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7 9l-4 4 4 4M17 15l4-4-4-4"/>
+                            <path d="M3 13h13.5a4.5 4.5 0 0 0 0-9H11M21 11H7.5a4.5 4.5 0 0 0 0 9H13"/>
+                        </svg>
+                    </button>
+                </div>
 
                 <div class="select-box">
                     <label>To</label>
@@ -49,27 +56,20 @@
             </div>
 
             <div class="result-area">
-                <div class="numeric-result">
-                    <span id="res-value">0.00</span>
-                </div>
+                <div class="numeric-result" id="res-value">0.00</div>
                 <div class="word-result-container">
-                    <p id="word-value">Zero rupees only</p>
+                    <p id="word-value">Syncing rates...</p>
                     <button id="copy-words" title="Copy to clipboard">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                     </button>
                 </div>
             </div>
 
             <div class="exchange-info">
-                <p id="rate-text">1 USD = ...</p>
-                <p id="last-updated">Updating rates...</p>
+                <p id="rate-text">Fetching live market rates...</p>
+                <p id="last-updated"></p>
             </div>
         </main>
-
-        <footer class="favorites-section">
-            <h3>Quick Access</h3>
-            <div id="favorites-list" class="fav-chips"></div>
-        </footer>
     </div>
     <div id="toast" class="toast">Copied to clipboard!</div>
     <script src="script.js"></script>
