@@ -1,7 +1,5 @@
 const state = {
-    // These are FALLBACKS. The app will fetch fresh rates immediately.
     rates: { "INR": 83.45, "USD": 1.0 },
-    lastUpdate: "",
     currencies: { 
         "USD": "US Dollar", "INR": "Indian Rupee", "EUR": "Euro", 
         "GBP": "British Pound", "JPY": "Japanese Yen", "CAD": "Canadian Dollar" 
@@ -11,7 +9,7 @@ const state = {
 const amountInput = document.getElementById('amount');
 const fromSelect = document.getElementById('from-currency');
 const toSelect = document.getElementById('to-currency');
-const mainResult = document.getElementById('main-result-display');
+const mainDisplay = document.getElementById('main-result');
 const numOutput = document.getElementById('numeric-output');
 const wordOutput = document.getElementById('word-value');
 const themeCheckbox = document.getElementById('theme-checkbox');
@@ -19,10 +17,10 @@ const themeCheckbox = document.getElementById('theme-checkbox');
 window.addEventListener('DOMContentLoaded', () => {
     initTheme();
     populateCurrencies();
-    fetchRates(); // Initial fetch
+    fetchRates();
     
     amountInput.addEventListener('input', convert);
-    fromSelect.addEventListener('change', fetchRates); // Re-fetch when base changes
+    fromSelect.addEventListener('change', fetchRates);
     toSelect.addEventListener('change', convert);
     document.getElementById('swap-btn').addEventListener('click', swapCurrencies);
     document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
@@ -32,18 +30,13 @@ window.addEventListener('DOMContentLoaded', () => {
 async function fetchRates() {
     const base = fromSelect.value;
     try {
-        // Cache busting: Added a timestamp to ensure fresh live rates
-        const response = await fetch(`https://api.frankfurter.app/latest?from=${base}&_=${Date.now()}`);
+        const response = await fetch(`https://api.frankfurter.app/latest?from=${base}&nocache=${Date.now()}`);
         const data = await response.json();
         state.rates = data.rates;
         state.rates[base] = 1.0;
-        state.lastUpdate = new Date().toLocaleString();
-        document.getElementById('timestamp').innerText = `${state.lastUpdate} · Live Market Data`;
+        document.getElementById('timestamp').innerText = `${new Date().toLocaleString()} · Live Market Data`;
         convert();
-    } catch (e) {
-        console.error("API Fetch failed, using last known rates.");
-        convert(); 
-    }
+    } catch (e) { convert(); }
 }
 
 function convert() {
@@ -53,18 +46,16 @@ function convert() {
     const rate = state.rates[to] || 1;
     const result = amount * rate;
 
-    // UI Updates
-    document.getElementById('top-rate-summary').innerText = `${amount} ${state.currencies[from]} equals`;
-    mainResult.innerText = `${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(result)} ${state.currencies[to]}`;
+    document.getElementById('top-summary').innerText = `${amount} ${state.currencies[from]} equals`;
+    mainDisplay.innerText = `${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(result)} ${state.currencies[to]}`;
     numOutput.innerText = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(result);
     
-    // Capitalization Fix
     const words = numberToWordsIndian(result, to);
     wordOutput.innerText = words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 function populateCurrencies() {
-    const options = Object.entries(state.currencies).map(([code, name]) => `<option value="${code}">${code}</option>`).join('');
+    const options = Object.entries(state.currencies).map(([code]) => `<option value="${code}">${code}</option>`).join('');
     fromSelect.innerHTML = options;
     toSelect.innerHTML = options;
     fromSelect.value = 'USD';

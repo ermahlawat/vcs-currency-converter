@@ -9,42 +9,44 @@
 </head>
 <body>
     <div class="app-wrapper">
-        <header class="top-bar">
+        <header class="header">
             <div class="brand"><b>VCs</b> Converter</div>
-            <div class="theme-switch-container">
+            <div class="theme-toggle">
                 <span class="mode-label">Dark Mode</span>
-                <input type="checkbox" id="theme-checkbox">
-                <label for="theme-checkbox" class="slider-label">
-                    <div class="switch-ball"></div>
+                <label class="switch">
+                    <input type="checkbox" id="theme-checkbox">
+                    <span class="slider"></span>
                 </label>
             </div>
         </header>
 
-        <main class="converter-container">
-            <p id="top-rate-summary" class="summary-text">1 US Dollar equals</p>
-            <h2 id="main-result-display" class="large-result">...</h2>
+        <main class="main-content">
+            <p id="top-summary" class="summary-text">1 US Dollar equals</p>
+            <h1 id="main-result" class="large-result">...</h1>
             <p id="timestamp" class="date-text">Syncing live rates...</p>
 
-            <div class="input-grid">
-                <div class="conversion-box">
+            <div class="converter-box">
+                <div class="input-row">
                     <input type="number" id="amount" value="1000" inputmode="decimal">
-                    <div class="divider"></div>
+                    <div class="v-line"></div>
                     <select id="from-currency"></select>
                 </div>
 
-                <button id="swap-btn" class="swap-action-btn">⇅</button>
+                <div class="swap-container">
+                    <button id="swap-btn" class="swap-btn">⇅</button>
+                </div>
 
-                <div class="conversion-box">
-                    <div id="numeric-output" class="read-only-display">0.00</div>
-                    <div class="divider"></div>
+                <div class="input-row">
+                    <div id="numeric-output" class="result-display">0.00</div>
+                    <div class="v-line"></div>
                     <select id="to-currency"></select>
                 </div>
             </div>
 
-            <div class="word-output-section">
+            <div class="word-section">
                 <div class="word-card">
                     <span id="word-value">Calculating...</span>
-                    <button id="copy-btn" class="copy-link">Copy</button>
+                    <button id="copy-btn" class="copy-btn">Copy Text</button>
                 </div>
             </div>
         </main>
