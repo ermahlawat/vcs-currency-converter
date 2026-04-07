@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VCs Currency Converter | Premium Exchange</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo-section">
+                <h1 class="brand">
+                    <span class="brand-bold">VCs</span>
+                    <span class="brand-thin">Currency Converter</span>
+                </h1>
+                <div id="offline-badge" class="badge hidden">Offline Mode</div>
+            </div>
+            <button id="theme-toggle" aria-label="Toggle Dark Mode">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M18.36 5.64l1.42-1.42"/></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+        </header>
+
+        <main class="converter-card">
+            <div class="input-group">
+                <label for="amount">Amount</label>
+                <input type="number" id="amount" placeholder="0.00" step="any" inputmode="decimal">
+            </div>
+
+            <div class="currency-selectors">
+                <div class="select-box">
+                    <label>From</label>
+                    <select id="from-currency"></select>
+                </div>
+                
+                <button id="swap-btn" class="swap-btn" aria-label="Swap Currencies">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="21" x2="21" y2="3"></line><polyline points="8 21 3 21 3 16"></polyline></svg>
+                </button>
+
+                <div class="select-box">
+                    <label>To</label>
+                    <select id="to-currency"></select>
+                </div>
+            </div>
+
+            <div class="result-area">
+                <div class="numeric-result">
+                    <span id="res-symbol"></span>
+                    <span id="res-value">0.00</span>
+                </div>
+                <div class="word-result-container">
+                    <p id="word-value">Zero rupees only</p>
+                    <button id="copy-words" title="Copy to clipboard">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="exchange-info">
+                <p id="rate-text">1 <span class="base-code">---</span> = ...</p>
+                <p id="last-updated">Updating rates...</p>
+            </div>
+        </main>
+
+        <footer class="favorites-section">
+            <h3>Quick Access</h3>
+            <div id="favorites-list" class="fav-chips"></div>
+        </footer>
+    </div>
+    <div id="toast" class="toast">Copied to clipboard!</div>
+    <script src="script.js"></script>
+</body>
+</html>
