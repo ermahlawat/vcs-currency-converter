@@ -5,53 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VCs Currency Converter</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1 class="main-title"><b>VCs</b> Currency Converter</h1>
-            <p class="subtitle">Enter an amount and select currencies for an instant, word-based conversion.</p>
+    <div class="app-wrapper">
+        <header class="top-bar">
+            <div class="brand"><b>VCs</b> Converter</div>
+            <div class="theme-toggle">
+                <input type="checkbox" id="theme-checkbox">
+                <label for="theme-checkbox" class="slider-label">
+                    <span class="mode-text light">Light</span>
+                    <span class="mode-text dark">Dark</span>
+                    <div class="switch-ball"></div>
+                </label>
+            </div>
         </header>
 
-        <div class="calculator-box">
-            <div class="field-row">
-                <label for="amount">Amount to convert</label>
-                <input type="number" id="amount" value="1000" inputmode="decimal">
-            </div>
+        <main class="converter-container">
+            <p id="top-rate-summary" class="summary-text">1 USD equals</p>
+            <h2 id="main-result-display" class="large-result">Loading...</h2>
+            <p id="timestamp" class="date-text">7 Apr, 2026 · Disclaimer</p>
 
-            <div class="field-row">
-                <label>Currencies to exchange</label>
-                <div class="selector-group">
+            <div class="input-grid">
+                <div class="conversion-box">
+                    <input type="number" id="amount" value="1" inputmode="decimal">
+                    <div class="divider"></div>
                     <select id="from-currency"></select>
-                    <button id="swap-btn" class="icon-btn" title="Swap">⇄</button>
+                </div>
+
+                <button id="swap-btn" class="swap-action-btn" title="Swap">⇅</button>
+
+                <div class="conversion-box">
+                    <div id="numeric-output" class="read-only-display">0.00</div>
+                    <div class="divider"></div>
                     <select id="to-currency"></select>
                 </div>
             </div>
 
-            <div class="meta-row">
-                <span id="current-date">Date: 04/07/2026</span>
-                <div class="toggle-container">
-                    <span class="toggle-label">Dark Mode</span>
-                    <label class="switch">
-                        <input type="checkbox" id="theme-checkbox">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="output-section">
-                <div class="display-value" id="res-value">0.00</div>
+            <div class="word-output-section">
                 <div class="word-card">
-                    <p id="word-value">Initializing...</p>
-                    <button id="copy-words" class="copy-btn">Copy</button>
-                </div>
-                <div class="market-info">
-                    <p id="rate-text">Loading live market data...</p>
-                    <p id="last-updated"></p>
+                    <span id="word-value">Calculating...</span>
+                    <button id="copy-btn" class="copy-link">Copy Text</button>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
     <div id="toast" class="toast">Copied to clipboard</div>
     <script src="script.js"></script>

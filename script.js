@@ -1,18 +1,16 @@
 const state = {
-    rates: { "INR": 83.45, "EUR": 0.92, "GBP": 0.79, "JPY": 151.6, "USD": 1.0 },
-    lastUpdate: null,
-    currencies: {
-        "USD": "USD", "EUR": "EUR", "GBP": "GBP", "INR": "INR", "AUD": "AUD", "CAD": "CAD", "JPY": "JPY", "CNY": "CNY"
-    }
+    rates: { "INR": 83.45, "USD": 1.0 },
+    lastUpdate: "",
+    currencies: { "USD": "United States Dollar", "INR": "Indian Rupee", "EUR": "Euro", "GBP": "British Pound", "JPY": "Japanese Yen", "CAD": "Canadian Dollar", "AUD": "Australian Dollar" }
 };
 
 const amountInput = document.getElementById('amount');
 const fromSelect = document.getElementById('from-currency');
 const toSelect = document.getElementById('to-currency');
-const resValue = document.getElementById('res-value');
-const wordValue = document.getElementById('word-value');
-const rateText = document.getElementById('rate-text');
-const lastUpdateText = document.getElementById('last-updated');
+const mainResult = document.getElementById('main-result-display');
+const numOutput = document.getElementById('numeric-output');
+const wordOutput = document.getElementById('word-value');
+const rateSummary = document.getElementById('top-rate-summary');
 const themeCheckbox = document.getElementById('theme-checkbox');
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -24,7 +22,7 @@ window.addEventListener('DOMContentLoaded', () => {
     fromSelect.addEventListener('change', fetchRates);
     toSelect.addEventListener('change', convert);
     document.getElementById('swap-btn').addEventListener('click', swapCurrencies);
-    document.getElementById('copy-words').addEventListener('click', copyToClipboard);
+    document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
     themeCheckbox.addEventListener('change', toggleTheme);
 });
 
@@ -32,51 +30,36 @@ async function fetchRates() {
     const base = fromSelect.value;
     try {
         const response = await fetch(`https://api.frankfurter.app/latest?from=${base}`);
-        if (!response.ok) throw new Error();
         const data = await response.json();
-        
         state.rates = data.rates;
-        state.rates[base] = 1.0; // Force base to be 1.0
-        state.lastUpdate = new Date().toLocaleTimeString();
-        
-        localStorage.setItem(`rates_${base}`, JSON.stringify(state.rates));
+        state.rates[base] = 1.0;
+        state.lastUpdate = new Date().toLocaleString('en-GB', { day: 'j', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        document.getElementById('timestamp').innerText = `${state.lastUpdate} UTC · Disclaimer`;
         convert();
-    } catch (err) {
-        const cached = localStorage.getItem(`rates_${base}`);
-        if (cached) state.rates = JSON.parse(cached);
-        convert();
-    }
+    } catch (e) { convert(); }
 }
 
 function convert() {
-    const amount = parseFloat(amountInput.value);
+    const amount = parseFloat(amountInput.value) || 0;
     const from = fromSelect.value;
     const to = toSelect.value;
-
-    if (isNaN(amount) || amount <= 0) {
-        resValue.innerText = '0.00';
-        wordValue.innerText = 'Zero units only';
-        return;
-    }
-
-    // Fixed logic: result = input * (rate of 'to' currency relative to 'from')
-    const rate = state.rates[to];
+    const rate = state.rates[to] || 1;
     const result = amount * rate;
 
-    resValue.innerText = new Intl.NumberFormat('en-IN', {
-        maximumFractionDigits: 2,
-        minimumFractionDigits: 2
-    }).format(result);
+    // Google-style Large Display
+    rateSummary.innerText = `${amount} ${state.currencies[from]} equals`;
+    mainResult.innerText = `${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 3 }).format(result)} ${state.currencies[to]}`;
     
-    wordValue.innerText = numberToWordsIndian(result, to);
-    rateText.innerText = `1 ${from} = ${rate.toFixed(4)} ${to}`;
-    lastUpdateText.innerText = `Refreshed at: ${state.lastUpdate || 'Cache'}`;
+    // Grid Display
+    numOutput.innerText = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(result);
+    
+    // Capitalized Word Output
+    const words = numberToWordsIndian(result, to);
+    wordOutput.innerText = words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 function populateCurrencies() {
-    const options = Object.entries(state.currencies)
-        .map(([code]) => `<option value="${code}">${code}</option>`)
-        .join('');
+    const options = Object.entries(state.currencies).map(([code, name]) => `<option value="${code}">${name}</option>`).join('');
     fromSelect.innerHTML = options;
     toSelect.innerHTML = options;
     fromSelect.value = 'USD';
@@ -87,15 +70,10 @@ function numberToWordsIndian(n, code) {
     const amount = n.toFixed(2).split(".");
     const main = parseInt(amount[0]);
     const sub = parseInt(amount[1]);
-    let str = (main === 0) ? "Zero" : convertToIndianWords(main);
-    
-    let cur = "rupees", sCur = "paise";
-    if (code === 'USD') { cur = "dollars"; sCur = "cents"; }
-    else if (code === 'EUR') { cur = "euros"; sCur = "cents"; }
-    else if (code === 'GBP') { cur = "pounds"; sCur = "pence"; }
-
+    let str = (main === 0) ? "zero" : convertToIndianWords(main);
+    let cur = (code === 'USD') ? "dollars" : (code === 'INR') ? "rupees" : "units";
     str += ` ${cur}`;
-    if (sub > 0) str += ` and ${convertToIndianWords(sub)} ${sCur}`;
+    if (sub > 0) str += ` and ${convertToIndianWords(sub)} cents`;
     return str + " only";
 }
 
@@ -118,7 +96,7 @@ function swapCurrencies() {
 }
 
 function copyToClipboard() {
-    navigator.clipboard.writeText(wordValue.innerText);
+    navigator.clipboard.writeText(wordOutput.innerText);
     const t = document.getElementById('toast');
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2000);
