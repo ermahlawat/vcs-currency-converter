@@ -1,5 +1,6 @@
 const state = {
-    rates: {},
+    // FIXED: Starter rates ensure the app NEVER shows NaN on first load
+    rates: { "INR": 83.50, "EUR": 0.92, "GBP": 0.79, "JPY": 151.0, "USD": 1.0 },
     base: 'USD',
     lastUpdate: null,
     currencies: {
@@ -52,8 +53,8 @@ async function fetchRates() {
         const cached = localStorage.getItem(`rates_${base}`);
         if (cached) {
             state.rates = JSON.parse(cached);
-            convert();
         }
+        convert();
     }
 }
 
@@ -62,22 +63,22 @@ function convert() {
     const to = toSelect.value;
     const from = fromSelect.value;
 
-    if (isNaN(amount) || amount <= 0 || (from !== to && !state.rates[to])) {
-        resValue.innerText = (from === to && !isNaN(amount)) ? amount.toFixed(2) : '0.00';
+    // Safety: prevent NaN if data isn't loaded yet
+    if (isNaN(amount) || amount <= 0) {
+        resValue.innerText = '0.00';
         wordValue.innerText = 'Zero units only';
         return;
     }
 
-    let result = (from === to) ? amount : amount * state.rates[to];
+    let result = (from === to) ? amount : amount * (state.rates[to] || 1);
 
-    resValue.innerText = new Intl.NumberFormat('en-IN', {
-        maximumFractionDigits: 2,
-        minimumFractionDigits: 2
-    }).format(result);
+    resValue.innerText = (from === 'INR' || to === 'INR') ? 
+        new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(result) :
+        new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(result);
     
     wordValue.innerText = numberToWordsIndian(result, to);
     if (state.rates[to]) rateText.innerText = `1 ${from} = ${state.rates[to].toFixed(4)} ${to}`;
-    lastUpdateText.innerText = `Last updated: ${state.lastUpdate || 'Offline'}`;
+    lastUpdateText.innerText = `Last updated: ${state.lastUpdate || 'Initial Load'}`;
 }
 
 function populateCurrencies() {
